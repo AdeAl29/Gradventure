@@ -69,8 +69,16 @@ const Game = (() => {
     
     // Create game objects
     groundY = canvasHeight * (CONFIG.GAME.GROUND_Y || 0.72);
-    player = new Player(100, groundY);
+    
+    // Read saved progress if restore is true
+    let startX = 100;
+    if (callbacks.restore) {
+      startX = Storage.load('gameProgressX', 100);
+    }
+    
+    player = new Player(startX, groundY);
     camera = new Camera(canvasWidth, canvasHeight, WORLD_WIDTH);
+    camera.x = Math.max(0, Math.min(startX - canvasWidth / 2, WORLD_WIDTH - canvasWidth)); // Pre-center camera
     particles = new ParticleEmitter();
     
     // Generate world
@@ -298,7 +306,7 @@ const Game = (() => {
    */
   function updateProgress() {
     const progress = Math.min(100, Math.round((player.x / CHEST_X) * 100));
-    if (onProgressUpdate) onProgressUpdate(progress);
+    if (onProgressUpdate) onProgressUpdate(progress, player.x);
   }
   
   // ─── RENDERING ──────────────────────────

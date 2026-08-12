@@ -116,6 +116,24 @@ const App = (() => {
     // Wait for "loading" to complete
     await wait(1800);
     
+    // Check saved state to jump directly
+    const savedState = Storage.load('appState');
+    if (savedState) {
+      if (savedState === STATES.INVITATION || savedState === STATES.FINISHED) {
+        transitionTo(STATES.INVITATION, true);
+        return;
+      } else if (savedState === STATES.GAME || savedState === STATES.CHEST_NEAR) {
+        startGame(true);
+        return;
+      } else if (savedState === STATES.ENVELOPE || savedState === STATES.CHEST_OPENING) {
+        transitionTo(STATES.ENVELOPE, true);
+        return;
+      } else if (savedState === STATES.NAME_INPUT) {
+        transitionTo(STATES.NAME_INPUT, true);
+        return;
+      }
+    }
+    
     // Transition to landing
     transitionTo(STATES.LANDING);
   }
@@ -335,10 +353,12 @@ const App = (() => {
   /**
    * Start the game after name input
    */
-  async function startGame() {
-    // Cinematic transition
-    cinematicOverlay.classList.add('active');
-    await wait(600);
+  async function startGame(isRestore = false) {
+    if (!isRestore) {
+      // Cinematic transition
+      cinematicOverlay.classList.add('active');
+      await wait(600);
+    }
     
     // Hide name screen, show game screen
     hideAllScreens();
@@ -347,6 +367,7 @@ const App = (() => {
     if (!gameInitialized) {
       const canvas = $('#game-canvas');
       Game.init(canvas, {
+        restore: isRestore,
         onChestNear: () => {
           currentState = STATES.CHEST_NEAR;
           showChestPrompt();
@@ -357,8 +378,9 @@ const App = (() => {
             hideChestPrompt();
           }
         },
-        onProgressUpdate: (progress) => {
+        onProgressUpdate: (progress, playerX) => {
           updateHUD(progress);
+          Storage.save('gameProgressX', playerX);
         },
       });
       gameInitialized = true;
@@ -380,18 +402,25 @@ const App = (() => {
       if (mobileControls) mobileControls.classList.add('visible');
     }
     
-    // Remove cinematic overlay
-    await wait(300);
-    cinematicOverlay.classList.remove('active');
-    
     // Start game loop
     Game.start();
     
     // Play music
     AudioManager.playMusic();
     
-    // Show instruction overlay
-    showGameInstruction();
+    if (!isRestore) {
+      // Remove cinematic overlay
+      await wait(300);
+      cinematicOverlay.classList.remove('active');
+      
+      // Show instruction overlay
+      showGameInstruction();
+    } else {
+      cinematicOverlay.classList.remove('active');
+    }
+    
+    // Save state
+    Storage.save('appState', currentState);
   }
   
   /**
@@ -475,9 +504,12 @@ const App = (() => {
   /**
    * Transition between states/screens
    */
-  async function transitionTo(newState) {
+  async function transitionTo(newState, isRestore = false) {
     const prevState = currentState;
     currentState = newState;
+    
+    // Save current state
+    Storage.save('appState', newState);
     
     switch (newState) {
       case STATES.LANDING:
@@ -486,11 +518,15 @@ const App = (() => {
         break;
         
       case STATES.NAME_INPUT:
-        cinematicOverlay.classList.add('active');
-        await wait(500);
+        if (!isRestore) {
+          cinematicOverlay.classList.add('active');
+          await wait(500);
+        }
         hideAllScreens();
         screens.name.classList.add('active');
-        await wait(100);
+        if (!isRestore) {
+          await wait(100);
+        }
         cinematicOverlay.classList.remove('active');
         // Pre-fill name if saved
         const nameInput = $('#name-input');
@@ -510,8 +546,10 @@ const App = (() => {
         break;
         
       case STATES.INVITATION:
-        cinematicOverlay.classList.add('active');
-        await wait(500);
+        if (!isRestore) {
+          cinematicOverlay.classList.add('active');
+          await wait(500);
+        }
         hideAllScreens();
         
         // Build invitation content
@@ -521,13 +559,15 @@ const App = (() => {
         screens.invitation.classList.add('active');
         document.body.style.overflow = 'auto';
         
-        await wait(100);
+        if (!isRestore) {
+          await wait(100);
+        }
         cinematicOverlay.classList.remove('active');
         
         // Mark as finished
         Storage.save('finished', true);
         
-        AudioManager.playSFX('success');
+        if (!isRestore) AudioManager.playSFX('success');
         break;
     }
   }
@@ -546,6 +586,11 @@ const App = (() => {
    * Restart the game from scratch
    */
   async function restartGame() {
+    // Clear saved states
+    Storage.save('appState', STATES.NAME_INPUT);
+    Storage.save('finished', false);
+    Storage.save('gameProgressX', 100);
+    
     Invitation.destroy();
     
     cinematicOverlay.classList.add('active');
