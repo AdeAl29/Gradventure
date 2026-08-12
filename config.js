@@ -26,7 +26,7 @@ const CONFIG = {
 
   // ─── Links ──────────────────────────────────────
   GOOGLE_MAP_URL: "https://www.google.com/maps/search/Selecta+Hotel+Medan+Jl.+Listrik+No.2",
-  WHATSAPP_NUMBER: "6281234567890", // Include country code, no +
+  WHATSAPP_NUMBER: "6289636278765", // Include country code, no +
   WHATSAPP_MESSAGE: "Halo, saya {name}, saya akan hadir dalam acara wisuda.",
 
   // ─── Profile & Gallery ─────────────────────────
