@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="description" content="You are invited to a graduation celebration. An interactive journey to discover a special invitation.">
+  <meta name="theme-color" content="#1a1714">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <title>Graduation Invitation — A Journey Awaits</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/invitation.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║         LOADING SCREEN               ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="loading-screen" class="screen active">
+    <div class="loading-logo">GRADUATION</div>
+    <div class="loading-subtitle">An Invitation Awaits You</div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║         LANDING SCREEN               ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="landing-screen" class="screen">
+    <div class="landing-bg">
+      <div class="landing-particles"></div>
+      <div class="landing-skyline"></div>
+    </div>
+    <div class="landing-content">
+      <p class="landing-ornament">✦ A JOURNEY AWAITS ✦</p>
+      <h1 class="landing-title">The Journey<br>Begins</h1>
+      <p class="landing-description">Before we open the invitation,<br>let us take you on a small adventure.</p>
+      <div class="landing-enter-btn">
+        <button id="landing-enter-btn" class="btn btn-primary" aria-label="Enter the experience">
+          Enter Experience →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║         NAME INPUT SCREEN            ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="name-screen" class="screen">
+    <div class="landing-bg">
+      <div class="landing-particles"></div>
+    </div>
+    <div class="name-content">
+      <h2 class="name-label">Siapa namamu?</h2>
+      <p class="name-subtitle">Tell us who you are</p>
+      <form id="name-form" class="name-input-group" autocomplete="off">
+        <div class="name-input-wrapper">
+          <input
+            type="text"
+            id="name-input"
+            class="name-input"
+            placeholder="Ketik namamu"
+            maxlength="50"
+            aria-label="Enter your name"
+            autocomplete="off"
+          >
+        </div>
+        <p id="name-error" class="name-error">Tulis namamu dulu ya ✨</p>
+        <button type="submit" class="btn btn-primary name-submit-btn" aria-label="Start the journey">
+          Mulai Perjalanan →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║         GAME SCREEN                  ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="game-screen" class="screen">
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- HUD -->
+    <div class="game-hud">
+      <div class="hud-left">
+        <span class="hud-welcome">Welcome, <span id="hud-name">Traveler</span></span>
+      </div>
+      <div class="hud-center">
+        <span class="hud-journey-label">Your Journey</span>
+      </div>
+      <div class="hud-right">
+        <div class="hud-progress">
+          <span class="hud-progress-text" id="hud-progress-text">0%</span>
+          <div class="hud-progress-bar">
+            <div class="hud-progress-fill" id="hud-progress-fill"></div>
+          </div>
+        </div>
+        <button class="hud-settings-btn" id="settings-btn" aria-label="Open settings">⚙</button>
+      </div>
+    </div>
+    
+    <!-- Game Instruction Overlay -->
+    <div class="game-instruction" id="game-instruction" style="display:none;"></div>
+    
+    <!-- Chest Interaction Prompt -->
+    <div class="chest-prompt" id="chest-prompt">
+      <p class="chest-prompt-text">Something is waiting for you…</p>
+      <div class="chest-prompt-key" id="chest-prompt-key" aria-label="Open chest">
+        Press E or Click to OPEN
+      </div>
+    </div>
+    
+    <!-- Mobile Controls -->
+    <div class="mobile-controls" id="mobile-controls">
+      <button class="mobile-btn" id="mobile-left" aria-label="Move left">◀</button>
+      <button class="mobile-btn" id="mobile-right" aria-label="Move right">▶</button>
+    </div>
+    
+    <!-- Mobile Interact Button -->
+    <button class="mobile-interact-btn" id="mobile-interact" aria-label="Open chest">
+      ✨ OPEN
+    </button>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║       SETTINGS MODAL                 ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="settings-modal" id="settings-modal">
+    <div class="settings-backdrop" id="settings-backdrop"></div>
+    <div class="settings-panel">
+      <h3 class="settings-title">Settings</h3>
+      <div class="settings-option">
+        <span class="settings-option-label">Music</span>
+        <div class="toggle-switch" id="music-setting-toggle" role="switch" aria-label="Toggle music" tabindex="0"></div>
+      </div>
+      <div class="settings-option">
+        <span class="settings-option-label">Sound Effects</span>
+        <div class="toggle-switch" id="sfx-setting-toggle" role="switch" aria-label="Toggle sound effects" tabindex="0"></div>
+      </div>
+      <div class="settings-actions">
+        <button class="settings-action-btn" id="settings-restart">🔄 Restart Journey</button>
+        <button class="settings-action-btn" id="settings-back-title">🏠 Back to Title</button>
+      </div>
+      <button class="settings-close-btn" id="settings-close">Close</button>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║       CHEST OPENING OVERLAY          ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="chest-overlay" class="screen">
+    <div class="chest-animation-container">
+      <p class="chest-found-text">You found an invitation…</p>
+    </div>
+    <button id="open-invitation-btn" class="btn btn-primary chest-open-invitation-btn" aria-label="Open the invitation">
+      ✉ Open Invitation
+    </button>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║       ENVELOPE OVERLAY               ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="envelope-overlay" class="screen">
+    <p class="envelope-label">A Special Letter For You</p>
+    <div class="envelope-container" id="envelope-container">
+      <div class="envelope-flap"></div>
+      <div class="envelope-seal">✦</div>
+      <div class="envelope-body"></div>
+    </div>
+    <p class="envelope-tap-hint">Tap the envelope to open</p>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║       INVITATION SCREEN              ║
+       ╚══════════════════════════════════════╝ -->
+  <div id="invitation-screen" class="screen">
+    <div id="invitation-content">
+      <!-- Dynamically built by invitation.js -->
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║       CINEMATIC TRANSITION           ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="cinematic-overlay" id="cinematic-overlay"></div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║       MUSIC TOGGLE (GLOBAL)          ║
+       ╚══════════════════════════════════════╝ -->
+  <button class="music-toggle-global" id="music-toggle" aria-label="Enable music">♪</button>
+
+  <!-- Scripts (order matters — dependencies first) -->
+  <script src="config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/invitation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

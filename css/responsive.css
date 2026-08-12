@@ -1,0 +1,228 @@
+/* ============================================
+   GRADVENTURE — Responsive Styles
+   ============================================ */
+
+/* ─── Tablet (768px) ─────────────────────── */
+@media (max-width: 768px) {
+  .game-hud {
+    padding: var(--space-sm) var(--space-md);
+    padding-top: calc(var(--space-sm) + env(safe-area-inset-top, 0px));
+  }
+
+  .hud-center {
+    display: none;
+  }
+
+  .hud-progress-bar {
+    width: 60px;
+  }
+
+  .mobile-controls {
+    display: flex;
+  }
+
+  /* Gallery: switch to swipe on mobile */
+  .gallery-grid {
+    display: none;
+  }
+
+  .gallery-swipe {
+    display: flex;
+  }
+
+  .countdown-grid {
+    gap: var(--space-md);
+  }
+
+  .countdown-number {
+    font-size: var(--fs-xl);
+    min-width: 65px;
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .timeline {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .timeline-card {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .event-card {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .profile-photo-container {
+    width: 140px;
+    height: 140px;
+  }
+
+  .final-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .final-actions .btn {
+    width: 100%;
+  }
+}
+
+/* ─── Small Phones (390px) ───────────────── */
+@media (max-width: 390px) {
+  .landing-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+
+  .name-label {
+    font-size: var(--fs-xl);
+  }
+
+  .name-input {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--fs-base);
+  }
+
+  .mobile-btn {
+    width: 64px;
+    height: 64px;
+    font-size: 1.5rem;
+  }
+
+  .invitation-main-title {
+    font-size: var(--fs-xl);
+  }
+
+  .countdown-grid {
+    gap: var(--space-sm);
+  }
+
+  .countdown-number {
+    font-size: var(--fs-lg);
+    min-width: 55px;
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .countdown-label {
+    font-size: 0.6rem;
+  }
+
+  .section {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .envelope-container {
+    width: 220px;
+    height: 160px;
+  }
+
+  .envelope-body {
+    height: 120px;
+  }
+}
+
+/* ─── Very Small Phones (360px) ──────────── */
+@media (max-width: 360px) {
+  .mobile-btn {
+    width: 58px;
+    height: 58px;
+    font-size: 1.3rem;
+  }
+
+  .hud-welcome {
+    font-size: 0.7rem;
+  }
+
+  .hud-progress-bar {
+    width: 50px;
+  }
+
+  .event-detail-row {
+    gap: var(--space-sm);
+  }
+
+  .event-detail-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ─── Large Desktop (1920px+) ────────────── */
+@media (min-width: 1920px) {
+  .event-card,
+  .thankyou-card,
+  .location-card {
+    max-width: 700px;
+  }
+
+  .gallery-grid {
+    max-width: 900px;
+  }
+
+  .timeline-card {
+    max-width: 280px;
+  }
+}
+
+/* ─── Safe Area (notched phones) ─────────── */
+@supports (padding: env(safe-area-inset-top)) {
+  .game-hud {
+    padding-top: calc(var(--space-md) + env(safe-area-inset-top));
+  }
+
+  .mobile-controls {
+    padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
+  }
+
+  .music-toggle-global {
+    bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
+    right: calc(var(--space-lg) + env(safe-area-inset-right));
+  }
+}
+
+/* ─── Landscape Mobile ───────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-hud {
+    padding: var(--space-xs) var(--space-md);
+  }
+
+  .mobile-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 1.2rem;
+  }
+
+  .mobile-controls {
+    padding: var(--space-sm) var(--space-lg);
+  }
+
+  .invitation-header {
+    min-height: auto;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .final-section {
+    min-height: auto;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+}
+
+/* ─── Print Styles ───────────────────────── */
+@media print {
+  .game-hud,
+  .mobile-controls,
+  .music-toggle-global,
+  .rsvp-section,
+  .final-section .btn {
+    display: none !important;
+  }
+
+  .screen {
+    position: static !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
