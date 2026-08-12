@@ -33,8 +33,8 @@ const CONFIG = {
   PROFILE_IMAGE: "assets/images/profile.jpg",
   GALLERY_IMAGES: [
     { src: "assets/images/gallery-1.jpg", caption: "Hari pertama kuliah" },
-    { src: "assets/images/gallery-2.jpg", caption: "Bersama teman-teman" },
-    { src: "assets/images/gallery-3.jpg", caption: "Sidang skripsi" },
+    { src: "assets/images/gallery-2.jpg", caption: "Sidang skripsi" },
+    { src: "assets/images/gallery-3.jpg", caption: "Teman-teman sidang bersama" },
     { src: "assets/images/gallery-4.jpg", caption: "Wisuda rehearsal" },
     { src: "assets/images/gallery-5.jpg", caption: "Momen bahagia" },
   ],
