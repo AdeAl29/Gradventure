@@ -24,6 +24,7 @@ const App = (() => {
   
   let currentState = STATES.LOADING;
   let playerName = '';
+  let playerGender = 'male';
   let gameInitialized = false;
   
   // ─── DOM Elements ──────────────────────
@@ -60,6 +61,9 @@ const App = (() => {
     
     // Check for saved state
     checkSavedState();
+    
+    // Render gender previews
+    renderGenderPreviews();
     
     // Start loading sequence
     startLoading();
@@ -143,7 +147,12 @@ const App = (() => {
    */
   function checkSavedState() {
     const savedName = Storage.load('playerName');
+    const savedGender = Storage.load('playerGender');
     const finished = Storage.load('finished', false);
+    
+    if (savedGender) {
+      playerGender = savedGender;
+    }
     
     if (savedName) {
       playerName = savedName;
@@ -199,6 +208,7 @@ const App = (() => {
         nameError.classList.remove('show');
         playerName = name;
         Storage.save('playerName', playerName);
+        Storage.save('playerGender', playerGender);
         
         AudioManager.playSFX('click');
         startGame();
@@ -212,6 +222,17 @@ const App = (() => {
         }
       });
     }
+    
+    // ── Gender Selection ──
+    const genderCards = document.querySelectorAll('.gender-card');
+    genderCards.forEach(card => {
+      card.addEventListener('click', () => {
+        genderCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        playerGender = card.dataset.gender;
+        AudioManager.playSFX('click');
+      });
+    });
     
 
     // ── Settings Button ──
@@ -355,6 +376,7 @@ const App = (() => {
       const canvas = $('#game-canvas');
       Game.init(canvas, {
         restore: isRestore,
+        gender: playerGender,
         onChestNear: () => {
           currentState = STATES.CHEST_NEAR;
           showChestPrompt();
@@ -419,8 +441,8 @@ const App = (() => {
     
     // Set text based on device
     instruction.textContent = isTouchDevice()
-      ? 'Gunakan tombol di bawah untuk bergerak'
-      : 'Gunakan ← dan → untuk bergerak';
+      ? 'Gunakan tombol ◀ ▶ untuk bergerak, ▲ untuk loncat'
+      : 'Gunakan ← dan → untuk bergerak, Spasi/↑ untuk loncat';
     
     instruction.style.display = 'block';
     instruction.classList.remove('fade-out');
@@ -612,6 +634,32 @@ const App = (() => {
     const div = document.createElement('div');
     div.textContent = String(str);
     return div.innerHTML;
+  }
+  
+  /**
+   * Render character previews on gender selection canvases
+   */
+  function renderGenderPreviews() {
+    const maleCanvas = document.getElementById('preview-male');
+    const femaleCanvas = document.getElementById('preview-female');
+    
+    if (maleCanvas) {
+      const ctx = maleCanvas.getContext('2d');
+      const tempPlayer = new Player(40, 100, 'male');
+      tempPlayer.y = 100 - tempPlayer.height;
+      tempPlayer.direction = 1;
+      ctx.clearRect(0, 0, 80, 120);
+      tempPlayer.draw(ctx);
+    }
+    
+    if (femaleCanvas) {
+      const ctx = femaleCanvas.getContext('2d');
+      const tempPlayer = new Player(40, 100, 'female');
+      tempPlayer.y = 100 - tempPlayer.height;
+      tempPlayer.direction = 1;
+      ctx.clearRect(0, 0, 80, 120);
+      tempPlayer.draw(ctx);
+    }
   }
   
   return { init };

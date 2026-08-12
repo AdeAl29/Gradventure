@@ -18,6 +18,11 @@ const Game = (() => {
   let camera;
   let particles;
   
+  // ─── NPCs & Obstacles ─────────────────────
+  let npcs = [];
+  let obstacles = [];
+  let playerGender = 'male';
+  
   // ─── World ──────────────────────────────
   const WORLD_WIDTH = CONFIG.GAME.WORLD_WIDTH || 4000;
   const CHEST_X = CONFIG.GAME.CHEST_POSITION || 3600;
@@ -27,6 +32,7 @@ const Game = (() => {
   const keys = {};
   let moveLeft = false;
   let moveRight = false;
+  let jumpPressed = false;
   
   // ─── Game State ─────────────────────────
   let running = false;
@@ -63,6 +69,7 @@ const Game = (() => {
     onChestNear = callbacks.onChestNear || null;
     onChestLeave = callbacks.onChestLeave || null;
     onProgressUpdate = callbacks.onProgressUpdate || null;
+    playerGender = callbacks.gender || 'male';
     
     // Set canvas size
     resize();
@@ -76,13 +83,20 @@ const Game = (() => {
       startX = Storage.load('gameProgressX', 100);
     }
     
-    player = new Player(startX, groundY);
+    player = new Player(startX, groundY, playerGender);
     camera = new Camera(canvasWidth, canvasHeight, WORLD_WIDTH);
-    camera.x = Math.max(0, Math.min(startX - canvasWidth / 2, WORLD_WIDTH - canvasWidth)); // Pre-center camera
+    camera.x = Math.max(0, Math.min(startX - canvasWidth / 2, WORLD_WIDTH - canvasWidth));
     particles = new ParticleEmitter();
     
     // Generate world
     generateWorld();
+    
+    // Generate NPCs
+    generateNPCs();
+    
+    // Generate obstacles
+    const npcPositions = npcs.map(n => n.x);
+    obstacles = generateObstacles(groundY, WORLD_WIDTH, CHEST_X, npcPositions);
     
     // Bind input
     bindInput();
@@ -203,13 +217,34 @@ const Game = (() => {
   }
   
   /**
+   * Generate NPC characters
+   */
+  function generateNPCs() {
+    npcs = [];
+    const dialogs = CONFIG.NPC_DIALOGS || [
+      "Hidup Rokowi!", "Semangat bang!", "Jangan lupa makan ya...",
+      "Skripsi ku kapan selesai ya 😭", "Senyum dong, mau difoto!", "Kamu pasti bisa! ✨"
+    ];
+    const positions = [400, 900, 1500, 2100, 2600, 3200];
+    const facings = [1, -1, 1, -1, 1, -1];
+    
+    for (let i = 0; i < 6; i++) {
+      npcs.push(new NPC(
+        positions[i], groundY, i,
+        dialogs[i % dialogs.length],
+        facings[i]
+      ));
+    }
+  }
+  
+  /**
    * Bind keyboard and touch input
    */
   function bindInput() {
     // Keyboard
     window.addEventListener('keydown', (e) => {
       keys[e.key] = true;
-      if (['ArrowLeft', 'ArrowRight', 'a', 'd', 'A', 'D'].includes(e.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'a', 'd', 'A', 'D', ' '].includes(e.key)) {
         e.preventDefault();
       }
     });
@@ -261,6 +296,25 @@ const Game = (() => {
         rightBtn.classList.remove('pressed');
       });
     }
+    
+    // Mobile jump button
+    const jumpBtn = $('#mobile-jump');
+    if (jumpBtn) {
+      jumpBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        jumpPressed = true;
+        jumpBtn.classList.add('pressed');
+      });
+      jumpBtn.addEventListener('pointerup', () => {
+        jumpBtn.classList.remove('pressed');
+      });
+      jumpBtn.addEventListener('pointerleave', () => {
+        jumpBtn.classList.remove('pressed');
+      });
+      jumpBtn.addEventListener('pointercancel', () => {
+        jumpBtn.classList.remove('pressed');
+      });
+    }
   }
   
   /**
@@ -271,6 +325,7 @@ const Game = (() => {
     
     const left = keys['ArrowLeft'] || keys['a'] || keys['A'] || moveLeft;
     const right = keys['ArrowRight'] || keys['d'] || keys['D'] || moveRight;
+    const jump = keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' '] || jumpPressed;
     
     if (left && !right) {
       player.moveLeft();
@@ -278,6 +333,30 @@ const Game = (() => {
       player.moveRight();
     } else {
       player.stop();
+    }
+    
+    if (jump) {
+      player.jump();
+      jumpPressed = false; // Consume jump press
+    }
+  }
+  
+  /**
+   * Handle obstacle collisions
+   */
+  function handleObstacleCollisions() {
+    for (const obs of obstacles) {
+      if (obs.checkCollision(player)) {
+        // Push player out — determine direction
+        const playerCenter = player.x;
+        const obsCenter = obs.x;
+        if (playerCenter < obsCenter) {
+          player.x = obs.x - obs.width / 2 - player.width / 2 - 2;
+        } else {
+          player.x = obs.x + obs.width / 2 + player.width / 2 + 2;
+        }
+        player.velocity = 0;
+      }
     }
   }
   
@@ -782,9 +861,16 @@ const Game = (() => {
     
     // Update
     player.update(WORLD_WIDTH);
+    handleObstacleCollisions();
     camera.follow(player.getCenterX());
     camera.update();
     particles.update();
+    
+    // Update NPCs
+    npcs.forEach(npc => npc.update(player.x));
+    
+    // Update obstacles
+    obstacles.forEach(obs => obs.update());
     
     // Check interactions
     checkChestInteraction();
@@ -839,8 +925,14 @@ const Game = (() => {
     drawFlowers();
     camera.applyTransform(ctx);
     
-    // Special area near chest
+    // Obstacles (world space)
     camera.restoreTransform(ctx);
+    obstacles.forEach(obs => obs.draw(ctx, camera.x));
+    
+    // NPCs (world space — characters, no bubbles yet)
+    npcs.forEach(npc => npc.draw(ctx, camera.x));
+    
+    // Special area near chest
     drawSpecialArea();
     camera.applyTransform(ctx);
     
@@ -850,7 +942,6 @@ const Game = (() => {
     
     // Player (in world space relative to camera)
     const playerScreenX = player.x - camera.x;
-    const playerScreenY = player.y;
     ctx.save();
     ctx.translate(playerScreenX - player.x, 0);
     player.draw(ctx);
@@ -895,6 +986,8 @@ const Game = (() => {
     if (player) {
       player.x = 100;
       player.velocity = 0;
+      player.vy = 0;
+      player.isGrounded = true;
       player.moving = false;
     }
     
@@ -912,8 +1005,12 @@ const Game = (() => {
     Object.keys(keys).forEach(k => keys[k] = false);
     moveLeft = false;
     moveRight = false;
+    jumpPressed = false;
     
     generateWorld();
+    generateNPCs();
+    const npcPositions = npcs.map(n => n.x);
+    obstacles = generateObstacles(groundY, WORLD_WIDTH, CHEST_X, npcPositions);
   }
   
   /**

@@ -305,6 +305,17 @@
   transform: scale(0.95);
 }
 
+.mobile-jump-btn {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.3);
+  color: var(--gold-light);
+}
+
+.mobile-jump-btn:active,
+.mobile-jump-btn.pressed {
+  background: rgba(201, 168, 76, 0.3);
+}
+
 .mobile-interact-btn {
   position: absolute;
   bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));

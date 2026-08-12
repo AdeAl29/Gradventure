@@ -71,7 +71,20 @@ const CONFIG = {
     GROUND_Y: 0.72,           // Ground level (% of canvas height)
     CAMERA_SMOOTHING: 0.08,   // Camera interpolation factor
     INTERACTION_RADIUS: 120,  // Chest interaction distance
+    JUMP_FORCE: -10,          // Jump velocity (negative = up)
+    GRAVITY: 0.5,             // Gravity acceleration
+    OBSTACLES_ENABLED: true,  // Enable/disable obstacles
   },
+
+  // ─── NPC Dialogs ──────────────────────────────────
+  NPC_DIALOGS: [
+    "Hidup Rokowi! 🇮🇩",
+    "Semangat bang! 💪",
+    "Jangan lupa makan ya...",
+    "Skripsi ku kapan selesai ya 😭",
+    "Senyum dong, mau difoto! 📸",
+    "Kamu pasti bisa! ✨",
+  ],
 
   // ─── Theme Overrides (optional) ─────────────────
   // Override CSS variables if needed

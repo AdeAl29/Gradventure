@@ -83,6 +83,24 @@
           >
         </div>
         <p id="name-error" class="name-error">Tulis namamu dulu ya ✨</p>
+        
+        <!-- Gender Selection -->
+        <p class="gender-label">Pilih Karaktermu</p>
+        <div class="gender-selector" id="gender-selector">
+          <div class="gender-card selected" data-gender="male" id="gender-male">
+            <div class="gender-preview gender-preview-male">
+              <canvas id="preview-male" width="80" height="120"></canvas>
+            </div>
+            <span class="gender-card-label">Laki-laki</span>
+          </div>
+          <div class="gender-card" data-gender="female" id="gender-female">
+            <div class="gender-preview gender-preview-female">
+              <canvas id="preview-female" width="80" height="120"></canvas>
+            </div>
+            <span class="gender-card-label">Perempuan</span>
+          </div>
+        </div>
+        
         <button type="submit" class="btn btn-primary name-submit-btn" aria-label="Start the journey">
           Mulai Perjalanan →
         </button>
@@ -129,6 +147,7 @@
     <!-- Mobile Controls -->
     <div class="mobile-controls" id="mobile-controls">
       <button class="mobile-btn" id="mobile-left" aria-label="Move left">◀</button>
+      <button class="mobile-btn mobile-jump-btn" id="mobile-jump" aria-label="Jump">▲</button>
       <button class="mobile-btn" id="mobile-right" aria-label="Move right">▶</button>
     </div>
     
@@ -210,6 +229,8 @@
   <script src="js/particles.js"></script>
   <script src="js/camera.js"></script>
   <script src="js/player.js"></script>
+  <script src="js/npc.js"></script>
+  <script src="js/obstacles.js"></script>
   <script src="js/game.js"></script>
   <script src="js/invitation.js"></script>
   <script src="js/app.js"></script>
