@@ -213,20 +213,7 @@ const App = (() => {
       });
     }
     
-    // ── Music Toggle Button ──
-    const musicToggle = $('#music-toggle');
-    if (musicToggle) {
-      musicToggle.addEventListener('click', () => {
-        const isPlaying = AudioManager.toggleMusic();
-        musicToggle.textContent = isPlaying ? '♪' : '♪̸';
-        musicToggle.classList.toggle('playing', isPlaying);
-        musicToggle.setAttribute('aria-label', isPlaying ? 'Disable music' : 'Enable music');
-      });
-      
-      // Set initial state
-      musicToggle.classList.toggle('playing', AudioManager.isMusicEnabled());
-    }
-    
+
     // ── Settings Button ──
     const settingsBtn = $('#settings-btn');
     const settingsModal = $('#settings-modal');
