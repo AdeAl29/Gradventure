@@ -50,11 +50,6 @@ const Game = (() => {
   let stones = [];
   let birds = [];
   let grassPatches = [];
-  let signboards = [];
-  const SIGNBOARD_MESSAGES = [
-    { x: 720, text: 'Awas genangan air! Jangan sampai sepatumu kotor sebelum wisuda!' },
-    { x: 2200, text: 'Hampir sampai! Terus berjalan ke Timur...' },
-  ];
   
   // ─── Chest State ────────────────────────
   let chestGlow = 0;
@@ -222,8 +217,6 @@ const Game = (() => {
         sway: randomRange(0, Math.PI * 2),
       });
     }
-
-    signboards = SIGNBOARD_MESSAGES.map(sign => ({ ...sign, shown: false }));
   }
   
   /**
@@ -413,50 +406,19 @@ const Game = (() => {
     if (onProgressUpdate) onProgressUpdate(progress, player.x);
   }
 
-  function journeyProgress() {
-    return player ? Math.max(0, Math.min(1, player.x / CHEST_X)) : 0;
-  }
-
-  function mixColor(from, to, amount) {
-    const a = from.match(/\w\w/g).map(v => parseInt(v, 16));
-    const b = to.match(/\w\w/g).map(v => parseInt(v, 16));
-    return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * amount)).join(',')})`;
-  }
-  
   // ─── RENDERING ──────────────────────────
   
   /**
    * Draw sky gradient
    */
   function drawSky() {
-    const progress = journeyProgress();
-    const evening = Math.max(0, Math.min(1, (progress - 0.2) / 0.55));
-    const night = Math.max(0, Math.min(1, (progress - 0.68) / 0.32));
     const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-
-    const top = mixColor(mixColor('#5593d2', '#d97882', evening), '#101a3f', night);
-    const middle = mixColor(mixColor('#9ed2ea', '#f3a078', evening), '#26365d', night);
-    const bottom = mixColor(mixColor('#dcebdc', '#f4c39b', evening), '#473d62', night);
-    grad.addColorStop(0, top);
-    grad.addColorStop(0.45, middle);
-    grad.addColorStop(1, bottom);
+    grad.addColorStop(0, '#5593d2');
+    grad.addColorStop(0.45, '#9ed2ea');
+    grad.addColorStop(1, '#dcebdc');
     
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-    // Stars fade in as the player reaches the final stretch.
-    if (night > 0) {
-      ctx.save();
-      ctx.globalAlpha = night;
-      for (let i = 0; i < 42; i++) {
-        const sx = (i * 97 + 31) % canvasWidth;
-        const sy = 25 + ((i * 47) % Math.max(80, canvasHeight * .36));
-        const twinkle = 1 + Math.sin(Date.now() * .003 + i) * .35;
-        ctx.fillStyle = i % 7 === 0 ? '#ffe8a5' : '#fff8dc';
-        ctx.beginPath(); ctx.arc(sx, sy, (i % 3 ? 1.2 : 2) * twinkle, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.restore();
-    }
   }
   
   /**
