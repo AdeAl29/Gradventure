@@ -33,6 +33,7 @@ const Game = (() => {
   let moveLeft = false;
   let moveRight = false;
   let jumpPressed = false;
+  let inputLocked = false;
   
   // ─── Game State ─────────────────────────
   let running = false;
@@ -330,7 +331,10 @@ const Game = (() => {
    * Handle player input
    */
   function handleInput() {
-    if (chestOpened) return;
+    if (chestOpened || inputLocked) {
+      player.stop();
+      return;
+    }
     
     const left = keys['ArrowLeft'] || keys['a'] || keys['A'] || moveLeft;
     const right = keys['ArrowRight'] || keys['d'] || keys['D'] || moveRight;
@@ -1076,6 +1080,7 @@ const Game = (() => {
     moveLeft = false;
     moveRight = false;
     jumpPressed = false;
+    inputLocked = false;
     
     generateWorld();
     generateNPCs();
@@ -1099,6 +1104,11 @@ const Game = (() => {
     camera.setZoom(1.3);
     camera.shake(3);
   }
+
+  function setInputLocked(locked) {
+    inputLocked = Boolean(locked);
+    if (inputLocked && player) player.stop();
+  }
   
   /**
    * Get current player position
@@ -1114,6 +1124,7 @@ const Game = (() => {
     reset,
     resize,
     openChest,
+    setInputLocked,
     getPlayerX,
     get isRunning() { return running; },
     get isChestNear() { return chestNear; },

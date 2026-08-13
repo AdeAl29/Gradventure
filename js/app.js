@@ -327,6 +327,7 @@ const App = (() => {
         questAccepted = true;
         $('#quest-overlay')?.classList.remove('visible');
         AudioManager.playSFX('click');
+        Game.setInputLocked(false);
         Game.start();
         showGameInstruction();
       });
@@ -425,8 +426,9 @@ const App = (() => {
       if (mobileControls) mobileControls.classList.add('visible');
     }
     
-    // Start game loop after the first quest is accepted.
-    if (isRestore || questAccepted) Game.start();
+    // Keep rendering the world, but lock movement until the first quest is accepted.
+    Game.setInputLocked(!isRestore && !questAccepted);
+    Game.start();
     
     // Play music
     AudioManager.playMusic();
