@@ -423,13 +423,14 @@ const Game = (() => {
     const sunset = Math.max(0, Math.min(1, (progress - 0.2) / 0.5));
     const night = Math.max(0, Math.min(1, (progress - 0.7) / 0.3));
     const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-    const blend = (a, b, amount) => `rgb(${a.map((value, i) => Math.round(value + (b[i] - value) * amount)).join(',')})`;
+    const blend = (a, b, amount) => a.map((value, i) => Math.round(value + (b[i] - value) * amount));
+    const toRgb = color => `rgb(${color.join(',')})`;
     const top = blend(blend([85, 147, 210], [217, 120, 130], sunset), [16, 26, 63], night);
     const middle = blend(blend([158, 210, 234], [243, 160, 120], sunset), [38, 54, 93], night);
     const bottom = blend(blend([220, 235, 220], [244, 195, 155], sunset), [71, 61, 98], night);
-    grad.addColorStop(0, top);
-    grad.addColorStop(0.45, middle);
-    grad.addColorStop(1, bottom);
+    grad.addColorStop(0, toRgb(top));
+    grad.addColorStop(0.45, toRgb(middle));
+    grad.addColorStop(1, toRgb(bottom));
     
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
