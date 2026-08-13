@@ -26,6 +26,7 @@ const App = (() => {
   let playerName = '';
   let playerGender = 'male';
   let gameInitialized = false;
+  let questAccepted = false;
   
   // ─── DOM Elements ──────────────────────
   let screens = {};
@@ -319,6 +320,17 @@ const App = (() => {
         }
       });
     }
+
+    const questAcceptBtn = $('#quest-accept-btn');
+    if (questAcceptBtn) {
+      questAcceptBtn.addEventListener('click', () => {
+        questAccepted = true;
+        $('#quest-overlay')?.classList.remove('visible');
+        Game.setInputLocked(false);
+        AudioManager.playSFX('click');
+        showGameInstruction();
+      });
+    }
     
     // ── Chest Overlay: Open Invitation ──
     const openInvBtn = $('#open-invitation-btn');
@@ -413,7 +425,8 @@ const App = (() => {
       if (mobileControls) mobileControls.classList.add('visible');
     }
     
-    // Start game loop
+    // Render immediately, but keep the player still until the quest is accepted.
+    Game.setInputLocked(!isRestore && !questAccepted);
     Game.start();
     
     // Play music

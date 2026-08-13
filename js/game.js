@@ -50,6 +50,11 @@ const Game = (() => {
   let stones = [];
   let birds = [];
   let grassPatches = [];
+  let signboards = [];
+  const SIGNBOARD_MESSAGES = [
+    { x: 720, text: 'Awas genangan air! Jangan sampai sepatumu kotor sebelum wisuda!' },
+    { x: 2200, text: 'Hampir sampai! Terus berjalan ke Timur...' },
+  ];
   
   // ─── Chest State ────────────────────────
   let chestGlow = 0;
@@ -217,6 +222,8 @@ const Game = (() => {
         sway: randomRange(0, Math.PI * 2),
       });
     }
+
+    signboards = SIGNBOARD_MESSAGES.map(sign => ({ ...sign, shown: false }));
   }
   
   /**
@@ -412,13 +419,35 @@ const Game = (() => {
    * Draw sky gradient
    */
   function drawSky() {
+    const progress = player ? Math.max(0, Math.min(1, player.x / CHEST_X)) : 0;
+    const sunset = Math.max(0, Math.min(1, (progress - 0.2) / 0.5));
+    const night = Math.max(0, Math.min(1, (progress - 0.7) / 0.3));
     const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-    grad.addColorStop(0, '#5593d2');
-    grad.addColorStop(0.45, '#9ed2ea');
-    grad.addColorStop(1, '#dcebdc');
+    const blend = (a, b, amount) => `rgb(${a.map((value, i) => Math.round(value + (b[i] - value) * amount)).join(',')})`;
+    const top = blend(blend([85, 147, 210], [217, 120, 130], sunset), [16, 26, 63], night);
+    const middle = blend(blend([158, 210, 234], [243, 160, 120], sunset), [38, 54, 93], night);
+    const bottom = blend(blend([220, 235, 220], [244, 195, 155], sunset), [71, 61, 98], night);
+    grad.addColorStop(0, top);
+    grad.addColorStop(0.45, middle);
+    grad.addColorStop(1, bottom);
     
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    if (night > 0) {
+      ctx.save();
+      ctx.globalAlpha = night;
+      for (let i = 0; i < 42; i++) {
+        const x = (i * 97 + 31) % canvasWidth;
+        const y = 25 + ((i * 47) % Math.max(80, canvasHeight * 0.36));
+        const radius = (i % 3 ? 1.1 : 1.8) * (1 + Math.sin(Date.now() * 0.003 + i) * 0.3);
+        ctx.fillStyle = i % 7 === 0 ? '#ffe8a5' : '#fff8dc';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
   }
   
   /**
