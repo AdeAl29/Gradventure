@@ -135,6 +135,20 @@
     
     <!-- Game Instruction Overlay -->
     <div class="game-instruction" id="game-instruction" style="display:none;"></div>
+
+    <!-- Quest and signboard story moments -->
+    <div class="quest-overlay" id="quest-overlay" aria-modal="true" role="dialog">
+      <div class="quest-scroll">
+        <div class="quest-kicker">✦ PESAN RAHASIA ✦</div>
+        <h2>Quest Wisuda</h2>
+        <p id="quest-message">Halo Traveler! Undangan wisudamu disembunyikan di dalam Peti Emas di ujung jalan. Lewati rintangan dan temukan petinya!</p>
+        <button class="btn btn-primary quest-accept-btn" id="quest-accept-btn">Terima Misi ⚔️</button>
+      </div>
+    </div>
+    <div class="signboard-toast" id="signboard-toast" role="status">
+      <span class="signboard-toast-icon">🪧</span>
+      <p id="signboard-text"></p>
+    </div>
     
     <!-- Chest Interaction Prompt -->
     <div class="chest-prompt" id="chest-prompt">
@@ -184,6 +198,7 @@
        ║       CHEST OPENING OVERLAY          ║
        ╚══════════════════════════════════════╝ -->
   <div id="chest-overlay" class="screen">
+    <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
     <div class="chest-animation-container">
       <p class="chest-found-text">You found an invitation…</p>
     </div>

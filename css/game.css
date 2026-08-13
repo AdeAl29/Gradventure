@@ -16,6 +16,68 @@
   display: block;
 }
 
+/* Quest parchment shown before the first step */
+.quest-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-overlay) - 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: rgba(12, 10, 9, 0.62);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s ease, visibility .35s ease;
+}
+.quest-overlay.visible { opacity: 1; visibility: visible; }
+.quest-scroll {
+  width: min(92vw, 540px);
+  padding: clamp(28px, 6vw, 54px) clamp(24px, 7vw, 64px);
+  text-align: center;
+  color: #4e321b;
+  background: linear-gradient(135deg, #f4dfae, #fff3cc 48%, #dfbc78);
+  border: 10px solid #8c5c2e;
+  border-radius: 8px 14px 10px 16px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.45), inset 0 0 35px rgba(120,70,20,.16);
+  transform: translateY(18px) rotate(-1deg) scale(.96);
+  transition: transform .5s cubic-bezier(.2,.8,.2,1);
+}
+.quest-overlay.visible .quest-scroll { transform: translateY(0) rotate(-1deg) scale(1); }
+.quest-kicker { font-size: var(--fs-xs); letter-spacing: .2em; font-weight: 700; color: #8c5c2e; }
+.quest-scroll h2 { margin: 10px 0 16px; font-family: var(--font-heading); font-size: clamp(1.6rem, 5vw, 2.3rem); }
+.quest-scroll p { margin: 0 auto 26px; max-width: 420px; line-height: 1.7; font-size: var(--fs-base); }
+.quest-accept-btn { box-shadow: 0 8px 20px rgba(95,55,20,.25); }
+
+.signboard-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  z-index: var(--z-above);
+  width: min(88vw, 430px);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 18px;
+  color: #fff5dc;
+  background: rgba(49, 31, 19, .86);
+  border: 1px solid rgba(235, 194, 112, .5);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.signboard-toast.visible { opacity: 1; transform: translate(-50%, 0); }
+.signboard-toast-icon { font-size: 1.35rem; }
+.signboard-toast p { margin: 0; line-height: 1.45; font-size: var(--fs-sm); }
+
+.confetti-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti-piece { position: absolute; top: -18px; width: 9px; height: 15px; animation: confetti-fall 1.7s ease-in forwards; }
+@keyframes confetti-fall { to { transform: translate3d(var(--drift), 110vh, 0) rotate(720deg); } }
+
 /* ─── Game HUD ───────────────────────────── */
 .game-hud {
   position: absolute;

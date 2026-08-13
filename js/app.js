@@ -26,6 +26,7 @@ const App = (() => {
   let playerName = '';
   let playerGender = 'male';
   let gameInitialized = false;
+  let questAccepted = false;
   
   // ─── DOM Elements ──────────────────────
   let screens = {};
@@ -319,13 +320,25 @@ const App = (() => {
         }
       });
     }
+
+    const questAcceptBtn = $('#quest-accept-btn');
+    if (questAcceptBtn) {
+      questAcceptBtn.addEventListener('click', () => {
+        questAccepted = true;
+        $('#quest-overlay')?.classList.remove('visible');
+        AudioManager.playSFX('click');
+        Game.start();
+        showGameInstruction();
+      });
+    }
     
     // ── Chest Overlay: Open Invitation ──
     const openInvBtn = $('#open-invitation-btn');
     if (openInvBtn) {
       openInvBtn.addEventListener('click', () => {
         AudioManager.playSFX('invitationOpen');
-        transitionTo(STATES.ENVELOPE);
+        launchConfetti();
+        setTimeout(() => transitionTo(STATES.ENVELOPE), 1150);
       });
     }
     
@@ -391,6 +404,7 @@ const App = (() => {
           updateHUD(progress);
           Storage.save('gameProgressX', playerX);
         },
+        onSignboard: (text) => showSignboard(text),
       });
       gameInitialized = true;
     } else {
@@ -411,8 +425,8 @@ const App = (() => {
       if (mobileControls) mobileControls.classList.add('visible');
     }
     
-    // Start game loop
-    Game.start();
+    // Start game loop after the first quest is accepted.
+    if (isRestore || questAccepted) Game.start();
     
     // Play music
     AudioManager.playMusic();
@@ -422,8 +436,14 @@ const App = (() => {
       await wait(300);
       cinematicOverlay.classList.remove('active');
       
-      // Show instruction overlay
-      showGameInstruction();
+      // The quest overlay pauses movement until accepted.
+      const quest = $('#quest-overlay');
+      const questMessage = $('#quest-message');
+      if (questMessage) questMessage.textContent = `Halo ${playerName}! Undangan wisudamu disembunyikan di dalam Peti Emas di ujung jalan. Lewati rintangan dan temukan petinya!`;
+      if (quest) {
+        playQuestSwoosh();
+        quest.classList.add('visible');
+      }
     } else {
       cinematicOverlay.classList.remove('active');
     }
@@ -476,6 +496,61 @@ const App = (() => {
     
     const interactBtn = $('#mobile-interact');
     if (interactBtn) interactBtn.classList.remove('visible');
+  }
+
+  function showSignboard(text) {
+    const toast = $('#signboard-toast');
+    const label = $('#signboard-text');
+    if (!toast || !label) return;
+    label.textContent = text;
+    toast.classList.add('visible');
+    clearTimeout(showSignboard.timer);
+    showSignboard.timer = setTimeout(() => toast.classList.remove('visible'), 4200);
+  }
+
+  function launchConfetti() {
+    const layer = $('#confetti-layer');
+    if (!layer) return;
+    layer.innerHTML = '';
+    const colors = ['#e8b84a', '#f07070', '#75b9e6', '#a9d66f', '#f5d9a6', '#d58ae0'];
+    for (let i = 0; i < 90; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = `${Math.random() * .45}s`;
+      piece.style.animationDuration = `${1.2 + Math.random() * 1.1}s`;
+      piece.style.setProperty('--drift', `${-160 + Math.random() * 320}px`);
+      layer.appendChild(piece);
+    }
+    setTimeout(() => { layer.innerHTML = ''; }, 2600);
+  }
+
+  // A tiny Web Audio fallback keeps the parchment reveal audible even when
+  // an optional external swoosh asset has not been configured.
+  function playQuestSwoosh() {
+    if (!AudioManager.isSFXEnabled()) return;
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const audioContext = new AudioContext();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(180, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(760, audioContext.currentTime + .42);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(900, audioContext.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(2600, audioContext.currentTime + .42);
+      gain.gain.setValueAtTime(.0001, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.12, audioContext.currentTime + .06);
+      gain.gain.exponentialRampToValueAtTime(.0001, audioContext.currentTime + .48);
+      oscillator.connect(filter).connect(gain).connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + .5);
+      oscillator.addEventListener('ended', () => audioContext.close());
+    } catch (e) { /* Audio is an enhancement; the quest still opens silently. */ }
   }
   
   /**
@@ -599,6 +674,7 @@ const App = (() => {
     Storage.save('appState', STATES.NAME_INPUT);
     Storage.save('finished', false);
     Storage.save('gameProgressX', 100);
+    questAccepted = false;
     
     Invitation.destroy();
     

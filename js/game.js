@@ -49,6 +49,11 @@ const Game = (() => {
   let stones = [];
   let birds = [];
   let grassPatches = [];
+  let signboards = [];
+  const SIGNBOARD_MESSAGES = [
+    { x: 720, text: 'Awas genangan air! Jangan sampai sepatumu kotor sebelum wisuda!' },
+    { x: 2200, text: 'Hampir sampai! Terus berjalan ke Timur...' },
+  ];
   
   // ─── Chest State ────────────────────────
   let chestGlow = 0;
@@ -58,6 +63,7 @@ const Game = (() => {
   let onChestNear = null;
   let onChestLeave = null;
   let onProgressUpdate = null;
+  let onSignboard = null;
   
   /**
    * Initialize the game
@@ -69,6 +75,7 @@ const Game = (() => {
     onChestNear = callbacks.onChestNear || null;
     onChestLeave = callbacks.onChestLeave || null;
     onProgressUpdate = callbacks.onProgressUpdate || null;
+    onSignboard = callbacks.onSignboard || null;
     playerGender = callbacks.gender || 'male';
     
     // Set canvas size
@@ -214,6 +221,8 @@ const Game = (() => {
         sway: randomRange(0, Math.PI * 2),
       });
     }
+
+    signboards = SIGNBOARD_MESSAGES.map(sign => ({ ...sign, shown: false }));
   }
   
   /**
@@ -379,6 +388,18 @@ const Game = (() => {
       }
     }
   }
+
+  function checkSignboardInteraction() {
+    signboards.forEach(sign => {
+      const near = Math.abs(player.x - sign.x) < 105;
+      if (near && !sign.shown) {
+        sign.shown = true;
+        if (onSignboard) onSignboard(sign.text);
+      } else if (!near) {
+        sign.shown = false;
+      }
+    });
+  }
   
   /**
    * Calculate and report progress
@@ -387,6 +408,16 @@ const Game = (() => {
     const progress = Math.min(100, Math.round((player.x / CHEST_X) * 100));
     if (onProgressUpdate) onProgressUpdate(progress, player.x);
   }
+
+  function journeyProgress() {
+    return player ? Math.max(0, Math.min(1, player.x / CHEST_X)) : 0;
+  }
+
+  function mixColor(from, to, amount) {
+    const a = from.match(/\w\w/g).map(v => parseInt(v, 16));
+    const b = to.match(/\w\w/g).map(v => parseInt(v, 16));
+    return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * amount)).join(',')})`;
+  }
   
   // ─── RENDERING ──────────────────────────
   
@@ -394,17 +425,34 @@ const Game = (() => {
    * Draw sky gradient
    */
   function drawSky() {
+    const progress = journeyProgress();
+    const evening = Math.max(0, Math.min(1, (progress - 0.2) / 0.55));
+    const night = Math.max(0, Math.min(1, (progress - 0.68) / 0.32));
     const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-    
-    // Warm morning sky
-    grad.addColorStop(0, '#6B89A8');    // Soft blue top
-    grad.addColorStop(0.3, '#A8C4D4');  // Light blue
-    grad.addColorStop(0.5, '#E8D8C4');  // Warm cream
-    grad.addColorStop(0.7, '#F0E0C8');  // Ivory
-    grad.addColorStop(1, '#E8DFD0');    // Beige
+
+    const top = mixColor(mixColor('#5593d2', '#d97882', evening), '#101a3f', night);
+    const middle = mixColor(mixColor('#9ed2ea', '#f3a078', evening), '#26365d', night);
+    const bottom = mixColor(mixColor('#dcebdc', '#f4c39b', evening), '#473d62', night);
+    grad.addColorStop(0, top);
+    grad.addColorStop(0.45, middle);
+    grad.addColorStop(1, bottom);
     
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // Stars fade in as the player reaches the final stretch.
+    if (night > 0) {
+      ctx.save();
+      ctx.globalAlpha = night;
+      for (let i = 0; i < 42; i++) {
+        const sx = (i * 97 + 31) % canvasWidth;
+        const sy = 25 + ((i * 47) % Math.max(80, canvasHeight * .36));
+        const twinkle = 1 + Math.sin(Date.now() * .003 + i) * .35;
+        ctx.fillStyle = i % 7 === 0 ? '#ffe8a5' : '#fff8dc';
+        ctx.beginPath(); ctx.arc(sx, sy, (i % 3 ? 1.2 : 2) * twinkle, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
   }
   
   /**
@@ -849,6 +897,26 @@ const Game = (() => {
       );
     }
   }
+
+  function drawSignboards() {
+    signboards.forEach(sign => {
+      const sx = sign.x - camera.x;
+      if (sx < -90 || sx > canvasWidth + 90) return;
+      const sy = groundY - 48;
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.fillStyle = 'rgba(0,0,0,.18)';
+      ctx.beginPath(); ctx.ellipse(0, 52, 25, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#704725'; ctx.fillRect(-3, 0, 6, 52);
+      ctx.fillStyle = '#a66b38';
+      ctx.beginPath(); ctx.roundRect(-50, -32, 100, 35, 5); ctx.fill();
+      ctx.strokeStyle = '#d29a59'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#fff0c8'; ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('PETUNJUK', 0, -10);
+      ctx.fillStyle = '#f3d37f'; ctx.font = 'bold 18px sans-serif'; ctx.fillText('→', 0, 10);
+      ctx.restore();
+    });
+  }
   
   /**
    * Main game loop
@@ -874,6 +942,7 @@ const Game = (() => {
     
     // Check interactions
     checkChestInteraction();
+    checkSignboardInteraction();
     updateProgress();
     
     // Ambient particles
@@ -928,6 +997,7 @@ const Game = (() => {
     // Obstacles (world space)
     camera.restoreTransform(ctx);
     obstacles.forEach(obs => obs.draw(ctx, camera.x));
+    drawSignboards();
     
     // NPCs (world space — characters, no bubbles yet)
     npcs.forEach(npc => npc.draw(ctx, camera.x));
