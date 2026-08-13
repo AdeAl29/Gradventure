@@ -128,7 +128,9 @@ const App = (() => {
         transitionTo(STATES.INVITATION, true);
         return;
       } else if (savedState === STATES.GAME || savedState === STATES.CHEST_NEAR) {
-        startGame(true);
+        // Avoid reopening a stale in-progress state from an older cached build.
+        Storage.save('appState', STATES.LANDING);
+        transitionTo(STATES.LANDING, true);
         return;
       } else if (savedState === STATES.ENVELOPE || savedState === STATES.CHEST_OPENING) {
         transitionTo(STATES.ENVELOPE, true);
