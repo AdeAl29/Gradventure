@@ -50,7 +50,6 @@ const Game = (() => {
   let stones = [];
   let birds = [];
   let grassPatches = [];
-  let chasms = [];
   let butterflies = [];
   
   // ─── Chest State ────────────────────────
@@ -218,12 +217,6 @@ const Game = (() => {
         hue: randomRange(90, 130),
       });
     }
-    
-    // Chasms (gaps in the ground with wooden bridges)
-    chasms = [
-      { x: 700, width: 80 },
-      { x: 1400, width: 90 },
-    ];
     
     // Butterflies
     butterflies = [];
@@ -608,40 +601,6 @@ const Game = (() => {
     
     ctx.fillStyle = grad;
     ctx.fillRect(0, groundY, canvasWidth, canvasHeight - groundY);
-    
-    // Draw chasm holes in ground (cut out)
-    chasms.forEach(chasm => {
-      const sx = chasm.x - camera.x;
-      if (sx > canvasWidth + chasm.width || sx + chasm.width < -chasm.width) return;
-      
-      // Dark pit
-      ctx.fillStyle = '#1a1210';
-      ctx.fillRect(sx, groundY, chasm.width, canvasHeight - groundY);
-      
-      // Depth gradient
-      const depthGrad = ctx.createLinearGradient(0, groundY, 0, groundY + 40);
-      depthGrad.addColorStop(0, 'rgba(0,0,0,0.6)');
-      depthGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = depthGrad;
-      ctx.fillRect(sx, groundY, chasm.width, 40);
-      
-      // Edge crumbling rocks on left side
-      ctx.fillStyle = '#5C4A3A';
-      ctx.beginPath();
-      ctx.moveTo(sx, groundY);
-      ctx.lineTo(sx + 5, groundY + 8);
-      ctx.lineTo(sx - 2, groundY + 6);
-      ctx.closePath();
-      ctx.fill();
-      
-      // Edge crumbling rocks on right side
-      ctx.beginPath();
-      ctx.moveTo(sx + chasm.width, groundY);
-      ctx.lineTo(sx + chasm.width - 5, groundY + 8);
-      ctx.lineTo(sx + chasm.width + 2, groundY + 6);
-      ctx.closePath();
-      ctx.fill();
-    });
     
     // Path (cobblestone road)
     const pathY = groundY + 4;
