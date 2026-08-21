@@ -50,11 +50,8 @@ const Game = (() => {
   let stones = [];
   let birds = [];
   let grassPatches = [];
-  let signboards = [];
-  const SIGNBOARD_MESSAGES = [
-    { x: 720, text: 'Awas genangan air! Jangan sampai sepatumu kotor sebelum wisuda!' },
-    { x: 2200, text: 'Hampir sampai! Terus berjalan ke Timur...' },
-  ];
+  let chasms = [];
+  let butterflies = [];
   
   // ─── Chest State ────────────────────────
   let chestGlow = 0;
@@ -64,7 +61,6 @@ const Game = (() => {
   let onChestNear = null;
   let onChestLeave = null;
   let onProgressUpdate = null;
-  let onSignboard = null;
   
   /**
    * Initialize the game
@@ -76,7 +72,6 @@ const Game = (() => {
     onChestNear = callbacks.onChestNear || null;
     onChestLeave = callbacks.onChestLeave || null;
     onProgressUpdate = callbacks.onProgressUpdate || null;
-    onSignboard = callbacks.onSignboard || null;
     playerGender = callbacks.gender || 'male';
     
     // Set canvas size
@@ -202,28 +197,50 @@ const Game = (() => {
     
     // Birds
     birds = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       birds.push({
         x: randomRange(0, WORLD_WIDTH),
-        y: randomRange(40, canvasHeight * 0.2),
-        speed: randomRange(0.3, 0.8),
+        y: randomRange(30, canvasHeight * 0.25),
+        speed: randomRange(0.3, 1.0),
         wingCycle: randomRange(0, Math.PI * 2),
-        size: randomRange(3, 6),
+        size: randomRange(4, 8),
       });
     }
     
     // Grass patches
     grassPatches = [];
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
       grassPatches.push({
         x: randomRange(0, WORLD_WIDTH),
-        blades: randomInt(3, 6),
-        height: randomRange(6, 14),
+        blades: randomInt(3, 7),
+        height: randomRange(6, 16),
         sway: randomRange(0, Math.PI * 2),
+        hue: randomRange(90, 130),
       });
     }
-
-    signboards = SIGNBOARD_MESSAGES.map(sign => ({ ...sign, shown: false }));
+    
+    // Chasms (gaps in the ground with wooden bridges)
+    chasms = [
+      { x: 700, width: 80 },
+      { x: 1400, width: 90 },
+    ];
+    
+    // Butterflies
+    butterflies = [];
+    for (let i = 0; i < 8; i++) {
+      butterflies.push({
+        x: randomRange(200, WORLD_WIDTH - 200),
+        y: randomRange(groundY - 80, groundY - 30),
+        baseX: 0,
+        baseY: 0,
+        phase: randomRange(0, Math.PI * 2),
+        speed: randomRange(0.3, 0.7),
+        wingColor: `hsl(${randomRange(0, 360)}, ${randomRange(60, 90)}%, ${randomRange(60, 80)}%)`,
+        size: randomRange(3, 5),
+      });
+      butterflies[butterflies.length - 1].baseX = butterflies[butterflies.length - 1].x;
+      butterflies[butterflies.length - 1].baseY = butterflies[butterflies.length - 1].y;
+    }
   }
   
   /**
@@ -235,7 +252,7 @@ const Game = (() => {
       "Hidup Rokowi!", "Semangat bang!", "Jangan lupa makan ya...",
       "Skripsi ku kapan selesai ya 😭", "Senyum dong, mau difoto!", "Kamu pasti bisa! ✨"
     ];
-    const positions = [400, 900, 1500, 2100, 2600, 3200];
+    const positions = [280, 550, 950, 1250, 1600, 1950];
     const facings = [1, -1, 1, -1, 1, -1];
     
     for (let i = 0; i < 6; i++) {
@@ -391,18 +408,6 @@ const Game = (() => {
         if (onChestLeave) onChestLeave();
       }
     }
-  }
-
-  function checkSignboardInteraction() {
-    signboards.forEach(sign => {
-      const near = Math.abs(player.x - sign.x) < 105;
-      if (near && !sign.shown) {
-        sign.shown = true;
-        if (onSignboard) onSignboard(sign.text);
-      } else if (!near) {
-        sign.shown = false;
-      }
-    });
   }
   
   /**
@@ -590,30 +595,113 @@ const Game = (() => {
   }
   
   /**
-   * Draw ground
+   * Draw ground with cobblestone path texture
    */
   function drawGround() {
-    // Ground fill
+    // Ground fill — rich grassy gradient
     const grad = ctx.createLinearGradient(0, groundY, 0, canvasHeight);
-    grad.addColorStop(0, '#8BA888');
-    grad.addColorStop(0.15, '#7A9A76');
-    grad.addColorStop(0.4, '#6B8B65');
-    grad.addColorStop(1, '#5A7B55');
+    grad.addColorStop(0, '#7AAF65');
+    grad.addColorStop(0.08, '#6B9E58');
+    grad.addColorStop(0.25, '#5C8D4B');
+    grad.addColorStop(0.6, '#4D7E3E');
+    grad.addColorStop(1, '#3E6F32');
     
     ctx.fillStyle = grad;
     ctx.fillRect(0, groundY, canvasWidth, canvasHeight - groundY);
     
-    // Path (dirt road)
-    const pathY = groundY + 5;
-    const pathHeight = 20;
-    ctx.fillStyle = '#C4B49A';
+    // Draw chasm holes in ground (cut out)
+    chasms.forEach(chasm => {
+      const sx = chasm.x - camera.x;
+      if (sx > canvasWidth + chasm.width || sx + chasm.width < -chasm.width) return;
+      
+      // Dark pit
+      ctx.fillStyle = '#1a1210';
+      ctx.fillRect(sx, groundY, chasm.width, canvasHeight - groundY);
+      
+      // Depth gradient
+      const depthGrad = ctx.createLinearGradient(0, groundY, 0, groundY + 40);
+      depthGrad.addColorStop(0, 'rgba(0,0,0,0.6)');
+      depthGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = depthGrad;
+      ctx.fillRect(sx, groundY, chasm.width, 40);
+      
+      // Edge crumbling rocks on left side
+      ctx.fillStyle = '#5C4A3A';
+      ctx.beginPath();
+      ctx.moveTo(sx, groundY);
+      ctx.lineTo(sx + 5, groundY + 8);
+      ctx.lineTo(sx - 2, groundY + 6);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Edge crumbling rocks on right side
+      ctx.beginPath();
+      ctx.moveTo(sx + chasm.width, groundY);
+      ctx.lineTo(sx + chasm.width - 5, groundY + 8);
+      ctx.lineTo(sx + chasm.width + 2, groundY + 6);
+      ctx.closePath();
+      ctx.fill();
+    });
+    
+    // Path (cobblestone road)
+    const pathY = groundY + 4;
+    const pathHeight = 22;
+    
+    // Base path color
+    const pathGrad = ctx.createLinearGradient(0, pathY, 0, pathY + pathHeight);
+    pathGrad.addColorStop(0, '#D4C4A8');
+    pathGrad.addColorStop(0.3, '#C8B898');
+    pathGrad.addColorStop(0.7, '#BCA888');
+    pathGrad.addColorStop(1, '#B09878');
+    ctx.fillStyle = pathGrad;
     ctx.fillRect(0, pathY, canvasWidth, pathHeight);
     
-    // Path edge highlights
-    ctx.fillStyle = '#D4C4AA';
-    ctx.fillRect(0, pathY, canvasWidth, 2);
-    ctx.fillStyle = '#B4A48A';
-    ctx.fillRect(0, pathY + pathHeight - 2, canvasWidth, 2);
+    // Cobblestone texture
+    const stoneSpacing = 18;
+    const camOff = camera.x % (stoneSpacing * 2);
+    
+    for (let row = 0; row < 2; row++) {
+      const rowY = pathY + 3 + row * 10;
+      const offset = row % 2 === 0 ? 0 : stoneSpacing;
+      
+      for (let sx = -camOff - stoneSpacing + offset; sx < canvasWidth + stoneSpacing; sx += stoneSpacing * 2) {
+        // Each cobblestone
+        const brightness = 40 + ((Math.abs(sx + camOff) * 7) % 15);
+        ctx.fillStyle = `hsl(35, 18%, ${brightness}%)`;
+        ctx.beginPath();
+        ctx.roundRect(sx + 1, rowY, stoneSpacing - 2, 8, 2);
+        ctx.fill();
+        
+        // Stone highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.beginPath();
+        ctx.roundRect(sx + 2, rowY, stoneSpacing - 4, 3, 1);
+        ctx.fill();
+      }
+    }
+    
+    // Path edge curb (top)
+    ctx.fillStyle = '#8B7B65';
+    ctx.fillRect(0, pathY - 2, canvasWidth, 3);
+    ctx.fillStyle = '#A09080';
+    ctx.fillRect(0, pathY - 2, canvasWidth, 1);
+    
+    // Path edge curb (bottom)
+    ctx.fillStyle = '#8B7B65';
+    ctx.fillRect(0, pathY + pathHeight, canvasWidth, 3);
+    ctx.fillStyle = '#706050';
+    ctx.fillRect(0, pathY + pathHeight + 2, canvasWidth, 1);
+    
+    // Dirt patches on grass
+    for (let i = 0; i < 6; i++) {
+      const dx = ((i * 397 + 123) % WORLD_WIDTH) - camera.x;
+      if (dx > -30 && dx < canvasWidth + 30) {
+        ctx.fillStyle = 'rgba(120, 100, 70, 0.15)';
+        ctx.beginPath();
+        ctx.ellipse(dx, groundY + pathHeight + 12, 15 + (i % 3) * 5, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
   
   /**
@@ -629,12 +717,13 @@ const Game = (() => {
       
       const gy = groundY;
       
-      ctx.strokeStyle = 'rgba(90, 140, 80, 0.6)';
-      ctx.lineWidth = 1.5;
-      
       for (let b = 0; b < patch.blades; b++) {
         const bx = gx + b * 3 - (patch.blades * 1.5);
         const sway = Math.sin(time + patch.sway + b * 0.5) * 3;
+        const h = patch.hue || 110;
+        
+        ctx.strokeStyle = `hsla(${h}, 40%, ${35 + (b % 3) * 5}%, 0.7)`;
+        ctx.lineWidth = 1.5;
         
         ctx.beginPath();
         ctx.moveTo(bx, gy);
@@ -739,29 +828,61 @@ const Game = (() => {
   }
   
   /**
-   * Draw birds (parallax layer 1 — 0.1x)
+   * Draw birds (parallax layer 1 — 0.15x) with flapping wings
    */
   function drawBirds() {
-    const parallax = camera.x * 0.1;
+    const parallax = camera.x * 0.15;
     const time = Date.now() * 0.003;
     
     birds.forEach(bird => {
       const bx = ((bird.x + bird.speed * Date.now() * 0.01) % (WORLD_WIDTH + 400)) - 200 - parallax;
-      const by = bird.y + Math.sin(time + bird.x) * 5;
+      const by = bird.y + Math.sin(time * 0.5 + bird.x) * 8;
       
       if (bx < -50 || bx > canvasWidth + 50) return;
       
-      const wing = Math.sin(time * 3 + bird.wingCycle) * 4;
+      const wing = Math.sin(time * 2.5 + bird.wingCycle);
+      const wingSpan = bird.size * 1.8;
       
-      ctx.strokeStyle = 'rgba(60, 50, 40, 0.4)';
-      ctx.lineWidth = 1.5;
-      ctx.lineCap = 'round';
+      ctx.save();
+      ctx.translate(bx, by);
       
+      // Body
+      ctx.fillStyle = 'rgba(50, 40, 30, 0.6)';
       ctx.beginPath();
-      ctx.moveTo(bx - bird.size, by + wing);
-      ctx.quadraticCurveTo(bx - bird.size * 0.3, by - Math.abs(wing) * 0.3, bx, by);
-      ctx.quadraticCurveTo(bx + bird.size * 0.3, by - Math.abs(wing) * 0.3, bx + bird.size, by + wing);
-      ctx.stroke();
+      ctx.ellipse(0, 0, bird.size * 0.6, bird.size * 0.35, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Left wing
+      ctx.fillStyle = 'rgba(60, 50, 40, 0.5)';
+      ctx.beginPath();
+      ctx.moveTo(-2, 0);
+      ctx.quadraticCurveTo(-wingSpan * 0.5, wing * wingSpan * 0.4 - bird.size * 0.3, -wingSpan, wing * wingSpan * 0.3);
+      ctx.quadraticCurveTo(-wingSpan * 0.4, wing * wingSpan * 0.2, -2, 0);
+      ctx.fill();
+      
+      // Right wing
+      ctx.beginPath();
+      ctx.moveTo(2, 0);
+      ctx.quadraticCurveTo(wingSpan * 0.5, wing * wingSpan * 0.4 - bird.size * 0.3, wingSpan, wing * wingSpan * 0.3);
+      ctx.quadraticCurveTo(wingSpan * 0.4, wing * wingSpan * 0.2, 2, 0);
+      ctx.fill();
+      
+      // Head
+      ctx.fillStyle = 'rgba(40, 35, 25, 0.6)';
+      ctx.beginPath();
+      ctx.arc(bird.size * 0.5, -bird.size * 0.15, bird.size * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Tail
+      ctx.fillStyle = 'rgba(50, 40, 30, 0.4)';
+      ctx.beginPath();
+      ctx.moveTo(-bird.size * 0.5, 0);
+      ctx.lineTo(-bird.size * 1.0, bird.size * 0.15);
+      ctx.lineTo(-bird.size * 0.9, -bird.size * 0.1);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.restore();
     });
   }
   
@@ -894,22 +1015,146 @@ const Game = (() => {
     }
   }
 
-  function drawSignboards() {
-    signboards.forEach(sign => {
-      const sx = sign.x - camera.x;
-      if (sx < -90 || sx > canvasWidth + 90) return;
-      const sy = groundY - 48;
+  /**
+   * Draw chasms with wooden bridges
+   */
+  function drawChasms() {
+    chasms.forEach(chasm => {
+      const sx = chasm.x - camera.x;
+      if (sx > canvasWidth + chasm.width || sx + chasm.width < -chasm.width) return;
+      
+      const bridgeY = groundY - 2;
+      const plankCount = Math.floor(chasm.width / 12);
+      
+      // Rope on left
+      ctx.strokeStyle = '#8B7355';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(sx - 5, bridgeY - 15);
+      ctx.quadraticCurveTo(sx + chasm.width / 2, bridgeY - 5, sx + chasm.width + 5, bridgeY - 15);
+      ctx.stroke();
+      
+      // Rope on right (lower rope)
+      ctx.beginPath();
+      ctx.moveTo(sx - 5, bridgeY - 8);
+      ctx.quadraticCurveTo(sx + chasm.width / 2, bridgeY + 2, sx + chasm.width + 5, bridgeY - 8);
+      ctx.stroke();
+      
+      // Planks
+      for (let i = 0; i < plankCount; i++) {
+        const px = sx + 4 + i * (chasm.width - 8) / plankCount;
+        const sag = Math.sin((i / plankCount) * Math.PI) * 3;
+        const plankW = 10;
+        const plankH = 4;
+        
+        // Plank shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(px - 1, bridgeY + sag + 1, plankW + 2, plankH);
+        
+        // Plank
+        const bri = 35 + (i % 3) * 5;
+        ctx.fillStyle = `hsl(30, 30%, ${bri}%)`;
+        ctx.beginPath();
+        ctx.roundRect(px, bridgeY + sag - 2, plankW, plankH, 1);
+        ctx.fill();
+        
+        // Wood grain
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(px + 2, bridgeY + sag - 1);
+        ctx.lineTo(px + plankW - 2, bridgeY + sag);
+        ctx.stroke();
+      }
+      
+      // Posts at each end
+      // Left post
+      ctx.fillStyle = '#6B5B4A';
+      ctx.fillRect(sx - 6, bridgeY - 20, 5, 24);
+      ctx.fillStyle = '#7B6B5A';
+      ctx.beginPath();
+      ctx.roundRect(sx - 7, bridgeY - 22, 7, 4, 1);
+      ctx.fill();
+      
+      // Right post
+      ctx.fillStyle = '#6B5B4A';
+      ctx.fillRect(sx + chasm.width + 1, bridgeY - 20, 5, 24);
+      ctx.fillStyle = '#7B6B5A';
+      ctx.beginPath();
+      ctx.roundRect(sx + chasm.width, bridgeY - 22, 7, 4, 1);
+      ctx.fill();
+      
+      // Danger sign on left post
+      ctx.fillStyle = '#e8c340';
+      ctx.beginPath();
+      ctx.moveTo(sx - 3.5, bridgeY - 18);
+      ctx.lineTo(sx - 7, bridgeY - 12);
+      ctx.lineTo(sx, bridgeY - 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 5px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('!', sx - 3.5, bridgeY - 13);
+    });
+  }
+  
+  /**
+   * Draw butterflies (world space, no camera transform)
+   */
+  function drawButterflies() {
+    const time = Date.now() * 0.001;
+    
+    butterflies.forEach(bf => {
+      // Move butterfly in figure-8 pattern
+      bf.x = bf.baseX + Math.sin(time * bf.speed + bf.phase) * 30;
+      bf.y = bf.baseY + Math.sin(time * bf.speed * 2 + bf.phase) * 15;
+      
+      const bx = bf.x - camera.x;
+      if (bx < -20 || bx > canvasWidth + 20) return;
+      
+      const wing = Math.sin(time * 8 + bf.phase);
+      const s = bf.size;
+      
       ctx.save();
-      ctx.translate(sx, sy);
-      ctx.fillStyle = 'rgba(0,0,0,.18)';
-      ctx.beginPath(); ctx.ellipse(0, 52, 25, 5, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#704725'; ctx.fillRect(-3, 0, 6, 52);
-      ctx.fillStyle = '#a66b38';
-      ctx.beginPath(); ctx.roundRect(-50, -32, 100, 35, 5); ctx.fill();
-      ctx.strokeStyle = '#d29a59'; ctx.lineWidth = 2; ctx.stroke();
-      ctx.fillStyle = '#fff0c8'; ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('PETUNJUK', 0, -10);
-      ctx.fillStyle = '#f3d37f'; ctx.font = 'bold 18px sans-serif'; ctx.fillText('→', 0, 10);
+      ctx.translate(bx, bf.y);
+      
+      // Left wing
+      ctx.fillStyle = bf.wingColor;
+      ctx.beginPath();
+      ctx.ellipse(-s * 0.5, 0, s, s * 0.6 * Math.abs(wing), 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Right wing
+      ctx.beginPath();
+      ctx.ellipse(s * 0.5, 0, s, s * 0.6 * Math.abs(wing), -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Wing pattern dots
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath();
+      ctx.arc(-s * 0.5, 0, s * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.5, 0, s * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Body
+      ctx.fillStyle = 'rgba(40,30,20,0.7)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, s * 0.15, s * 0.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Antennae
+      ctx.strokeStyle = 'rgba(40,30,20,0.5)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -s * 0.4);
+      ctx.lineTo(-s * 0.4, -s * 0.9);
+      ctx.moveTo(0, -s * 0.4);
+      ctx.lineTo(s * 0.4, -s * 0.9);
+      ctx.stroke();
+      
       ctx.restore();
     });
   }
@@ -938,7 +1183,6 @@ const Game = (() => {
     
     // Check interactions
     checkChestInteraction();
-    checkSignboardInteraction();
     updateProgress();
     
     // Ambient particles
@@ -952,6 +1196,14 @@ const Game = (() => {
       particles.emitLeaf(
         camera.x + randomRange(0, canvasWidth),
         randomRange(0, 50)
+      );
+    }
+    
+    // Occasional petals
+    if (Math.random() < 0.005) {
+      particles.emitPetal(
+        camera.x + randomRange(0, canvasWidth),
+        randomRange(20, canvasHeight * 0.4)
       );
     }
     
@@ -993,7 +1245,12 @@ const Game = (() => {
     // Obstacles (world space)
     camera.restoreTransform(ctx);
     obstacles.forEach(obs => obs.draw(ctx, camera.x));
-    drawSignboards();
+    
+    // Chasms with bridges
+    drawChasms();
+    
+    // Butterflies (world space)
+    drawButterflies();
     
     // NPCs (world space — characters, no bubbles yet)
     npcs.forEach(npc => npc.draw(ctx, camera.x));

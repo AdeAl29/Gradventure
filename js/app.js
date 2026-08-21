@@ -444,7 +444,7 @@ const App = (() => {
       const questMessage = $('#quest-message');
       if (questMessage) questMessage.textContent = `Halo ${playerName}! Undangan wisudamu disembunyikan di dalam Peti Emas di ujung jalan. Lewati rintangan dan temukan petinya!`;
       if (quest) {
-        playQuestSwoosh();
+        AudioManager.playSFX('transition');
         quest.classList.add('visible');
       }
     } else {
@@ -527,33 +527,6 @@ const App = (() => {
       layer.appendChild(piece);
     }
     setTimeout(() => { layer.innerHTML = ''; }, 2600);
-  }
-
-  // A tiny Web Audio fallback keeps the parchment reveal audible even when
-  // an optional external swoosh asset has not been configured.
-  function playQuestSwoosh() {
-    if (!AudioManager.isSFXEnabled()) return;
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      const audioContext = new AudioContext();
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(180, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(760, audioContext.currentTime + .42);
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(900, audioContext.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(2600, audioContext.currentTime + .42);
-      gain.gain.setValueAtTime(.0001, audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(.12, audioContext.currentTime + .06);
-      gain.gain.exponentialRampToValueAtTime(.0001, audioContext.currentTime + .48);
-      oscillator.connect(filter).connect(gain).connect(audioContext.destination);
-      oscillator.start();
-      oscillator.stop(audioContext.currentTime + .5);
-      oscillator.addEventListener('ended', () => audioContext.close());
-    } catch (e) { /* Audio is an enhancement; the quest still opens silently. */ }
   }
   
   /**

@@ -1,0 +1,6 @@
+node_modules/
+chrome-debug*/
+page-check.png
+*.log
+.DS_Store
+Thumbs.db

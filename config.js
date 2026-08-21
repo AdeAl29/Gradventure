@@ -65,9 +65,9 @@ const CONFIG = {
 
   // ─── Game Settings ──────────────────────────────
   GAME: {
-    WORLD_WIDTH: 4000,        // Total world width in pixels
+    WORLD_WIDTH: 2500,        // Total world width in pixels
     PLAYER_SPEED: 3.5,        // Player movement speed
-    CHEST_POSITION: 3600,     // X position of the chest
+    CHEST_POSITION: 2200,     // X position of the chest
     GROUND_Y: 0.72,           // Ground level (% of canvas height)
     CAMERA_SMOOTHING: 0.08,   // Camera interpolation factor
     INTERACTION_RADIUS: 120,  // Chest interaction distance
