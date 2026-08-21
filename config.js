@@ -78,7 +78,7 @@ const CONFIG = {
 
   // ─── NPC Dialogs ──────────────────────────────────
   NPC_DIALOGS: [
-    "Hidup Rokowi! 🇮🇩",
+    "Hidup Jokowi! 🇮🇩",
     "Semangat bang! 💪",
     "Jangan lupa makan ya...",
     "Skripsi ku kapan selesai ya 😭",

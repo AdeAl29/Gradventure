@@ -242,7 +242,7 @@ const Game = (() => {
   function generateNPCs() {
     npcs = [];
     const dialogs = CONFIG.NPC_DIALOGS || [
-      "Hidup Rokowi!", "Semangat bang!", "Jangan lupa makan ya...",
+      "Hidup Jokowi!", "Semangat bang!", "Jangan lupa makan ya...",
       "Skripsi ku kapan selesai ya 😭", "Senyum dong, mau difoto!", "Kamu pasti bisa! ✨"
     ];
     const positions = [280, 550, 950, 1250, 1600, 1950];
