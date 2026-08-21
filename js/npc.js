@@ -248,23 +248,27 @@ class NPC {
     ctx.fill();
     
     // Face features
-    // Eyes
+    // Eyes (both eyes)
     ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath(); ctx.ellipse(4, by + 7 + bob, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-4.5, by + 7 + bob, 3.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(4.5, by + 7 + bob, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#3A2A1A';
+    ctx.beginPath(); ctx.ellipse(-4.5, by + 7.5 + bob, 2.6, 3.2, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(4.5, by + 7.5 + bob, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#1A0A00';
+    ctx.beginPath(); ctx.arc(-4.5, by + 8 + bob, 1.4, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(5, by + 8 + bob, 1.8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(-5.2, by + 6.5 + bob, 0.9, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(3.5, by + 6.5 + bob, 1.2, 0, Math.PI * 2); ctx.fill();
     // Eyelashes
     ctx.strokeStyle = '#1A0A10'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(0, by + 3 + bob);
-    ctx.quadraticCurveTo(4, by + 1 + bob, 8, by + 3 + bob); ctx.stroke();
-    // Eyebrow
+    ctx.beginPath(); ctx.moveTo(-8, by + 3.5 + bob); ctx.quadraticCurveTo(-4.5, by + 1.5 + bob, -1, by + 3.5 + bob); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(1, by + 3 + bob); ctx.quadraticCurveTo(5, by + 1 + bob, 9, by + 3 + bob); ctx.stroke();
+    // Eyebrows
     ctx.strokeStyle = '#3A2A1A'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(1, by + 1 + bob);
-    ctx.quadraticCurveTo(4, by - 1 + bob, 7, by + 1 + bob); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-7.5, by + 1.5 + bob); ctx.quadraticCurveTo(-4.5, by - 0.5 + bob, -1.5, by + 1.5 + bob); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(1.5, by + 1 + bob); ctx.quadraticCurveTo(5, by - 1 + bob, 8.5, by + 1 + bob); ctx.stroke();
     
     // Smile
     ctx.fillStyle = '#D4707A';
@@ -423,14 +427,18 @@ class NPC {
     ctx.ellipse(8, by + 4 + bob, 12, 4, 0.3, -Math.PI * 0.3, Math.PI * 0.8);
     ctx.fill();
     
-    // Eyes
+    // Eyes (both eyes)
     ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.ellipse(-4.5, by + 8 + bob, 3.5, 4, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(5, by + 8 + bob, 4, 4.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#2A2A2A';
+    ctx.beginPath(); ctx.ellipse(-4.5, by + 8.5 + bob, 2.4, 2.8, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(5.5, by + 8.5 + bob, 2.8, 3.2, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#0A0A0A';
+    ctx.beginPath(); ctx.arc(-4.5, by + 9 + bob, 1.3, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(6, by + 9 + bob, 1.6, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(-5.2, by + 7.5 + bob, 0.8, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(4.5, by + 7.5 + bob, 1, 0, Math.PI * 2); ctx.fill();
     
     // Big grin
@@ -507,20 +515,24 @@ class NPC {
     ctx.beginPath(); ctx.ellipse(-12, by + 8 + bob, 4, 10, -0.1, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(12, by + 8 + bob, 3, 9, 0.1, 0, Math.PI * 2); ctx.fill();
     
-    // Eyes
+    // Eyes (both eyes)
     ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath(); ctx.ellipse(4, by + 7 + bob, 4.5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-4.5, by + 7 + bob, 3.8, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(4.5, by + 7 + bob, 4.5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#4A7A5A';
+    ctx.beginPath(); ctx.ellipse(-4.5, by + 7.5 + bob, 2.8, 3.4, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(4.5, by + 7.5 + bob, 3.5, 4, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#1A3A1A';
+    ctx.beginPath(); ctx.arc(-4.5, by + 8 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(5, by + 8 + bob, 2, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(-5.2, by + 6.5 + bob, 0.9, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(3.5, by + 6.5 + bob, 1.3, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(6, by + 9 + bob, 0.7, 0, Math.PI * 2); ctx.fill();
     // Eyelashes
     ctx.strokeStyle = '#2A1A0A'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(0, by + 3 + bob);
-    ctx.quadraticCurveTo(4, by + 0.5 + bob, 9, by + 3 + bob); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-8, by + 3.5 + bob); ctx.quadraticCurveTo(-4.5, by + 1 + bob, -1, by + 3.5 + bob); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, by + 3 + bob); ctx.quadraticCurveTo(4, by + 0.5 + bob, 9, by + 3 + bob); ctx.stroke();
     
     // Cute mouth
     ctx.fillStyle = '#E06080';
