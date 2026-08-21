@@ -975,90 +975,6 @@ const Game = (() => {
   }
 
   /**
-   * Draw chasms with wooden bridges
-   */
-  function drawChasms() {
-    chasms.forEach(chasm => {
-      const sx = chasm.x - camera.x;
-      if (sx > canvasWidth + chasm.width || sx + chasm.width < -chasm.width) return;
-      
-      const bridgeY = groundY - 2;
-      const plankCount = Math.floor(chasm.width / 12);
-      
-      // Rope on left
-      ctx.strokeStyle = '#8B7355';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(sx - 5, bridgeY - 15);
-      ctx.quadraticCurveTo(sx + chasm.width / 2, bridgeY - 5, sx + chasm.width + 5, bridgeY - 15);
-      ctx.stroke();
-      
-      // Rope on right (lower rope)
-      ctx.beginPath();
-      ctx.moveTo(sx - 5, bridgeY - 8);
-      ctx.quadraticCurveTo(sx + chasm.width / 2, bridgeY + 2, sx + chasm.width + 5, bridgeY - 8);
-      ctx.stroke();
-      
-      // Planks
-      for (let i = 0; i < plankCount; i++) {
-        const px = sx + 4 + i * (chasm.width - 8) / plankCount;
-        const sag = Math.sin((i / plankCount) * Math.PI) * 3;
-        const plankW = 10;
-        const plankH = 4;
-        
-        // Plank shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fillRect(px - 1, bridgeY + sag + 1, plankW + 2, plankH);
-        
-        // Plank
-        const bri = 35 + (i % 3) * 5;
-        ctx.fillStyle = `hsl(30, 30%, ${bri}%)`;
-        ctx.beginPath();
-        ctx.roundRect(px, bridgeY + sag - 2, plankW, plankH, 1);
-        ctx.fill();
-        
-        // Wood grain
-        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(px + 2, bridgeY + sag - 1);
-        ctx.lineTo(px + plankW - 2, bridgeY + sag);
-        ctx.stroke();
-      }
-      
-      // Posts at each end
-      // Left post
-      ctx.fillStyle = '#6B5B4A';
-      ctx.fillRect(sx - 6, bridgeY - 20, 5, 24);
-      ctx.fillStyle = '#7B6B5A';
-      ctx.beginPath();
-      ctx.roundRect(sx - 7, bridgeY - 22, 7, 4, 1);
-      ctx.fill();
-      
-      // Right post
-      ctx.fillStyle = '#6B5B4A';
-      ctx.fillRect(sx + chasm.width + 1, bridgeY - 20, 5, 24);
-      ctx.fillStyle = '#7B6B5A';
-      ctx.beginPath();
-      ctx.roundRect(sx + chasm.width, bridgeY - 22, 7, 4, 1);
-      ctx.fill();
-      
-      // Danger sign on left post
-      ctx.fillStyle = '#e8c340';
-      ctx.beginPath();
-      ctx.moveTo(sx - 3.5, bridgeY - 18);
-      ctx.lineTo(sx - 7, bridgeY - 12);
-      ctx.lineTo(sx, bridgeY - 12);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = '#333';
-      ctx.font = 'bold 5px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('!', sx - 3.5, bridgeY - 13);
-    });
-  }
-  
-  /**
    * Draw butterflies (world space, no camera transform)
    */
   function drawButterflies() {
@@ -1204,9 +1120,6 @@ const Game = (() => {
     // Obstacles (world space)
     camera.restoreTransform(ctx);
     obstacles.forEach(obs => obs.draw(ctx, camera.x));
-    
-    // Chasms with bridges
-    drawChasms();
     
     // Butterflies (world space)
     drawButterflies();
